@@ -21,7 +21,7 @@ USAGE
 
 		o | output_directory		The directory where the result output files will be stored. Required
 
-	nofasta | no_fasta_output	Use this option if you don't want fasta output. Optional, default: fasta files of the predicted proteins are produced
+	nofasta | no_fasta_output	Use this option if you don't want fasta output. Optional, default: fasta files of the predicted proteins are generated
 
 		p | selected_profiles		Use selected profiles only, i.e. -p Gs,Gio. Optional, default: All profiles are used (Galpha,Gs,Gio,Gq11,G1213,Gbeta,Ggamma)
 	
