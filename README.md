@@ -5,7 +5,7 @@ GprotPRED is a tool for accurate detection and classification of G-proteins.
 It uses profile Hidden Markov Models (pHMMs) for the four known heterotrimeric Galpha protein families, 
 the Gbeta and the Ggamma subunit in order to classify a set of protein sequences 
 into the appropriate G-protein family.
-This is a standalone version of GprotPRED tool for local execution.
+This is a standalone version of [GprotPRED] (http://aias.biol.uoa.gr/GprotPRED/) tool for offline use.
 
 DEPENDENCIES
 
