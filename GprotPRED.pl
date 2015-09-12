@@ -49,7 +49,7 @@ unless ( defined $fasta_flag ) {
 
 unless (@selected_profiles) {
     @selected_profiles
-        = ( "Galpha", "Gs", "Gio", "Gq11", "G1213", "Gbeta", "Ggamma" );
+        = ( "Galpha", "Gs", "Gio", "Gq11", "G12", "Gbeta", "Ggamma" );
 }
 
 system("mkdir -p $output_dir/$timestamp");
@@ -69,21 +69,22 @@ foreach my $profile (@selected_profiles) {
 
 print STDOUT "Summary file created...\n";
 
-#print $fasta_flag."\n";
+my $report_counters = get_report("$output_dir/$timestamp/summary.txt");
 if ($fasta_flag) {
     print STDOUT "Creating fasta output files...\n";
     system("mkdir -p $output_dir/$timestamp/fasta_output");
 
     foreach my $profile (@selected_profiles) {
-
-        #print $profile."\n";
-        create_fasta(
-            $profile, $input_file,
-            "$output_dir/$timestamp/summary.txt",
-            "$output_dir/$timestamp/fasta_output/$profile.fa"
-        );
+        if ( $report_counters->{$profile} > 0 ) {
+            create_fasta(
+                $profile, $input_file,
+                "$output_dir/$timestamp/summary.txt",
+                "$output_dir/$timestamp/fasta_output/$profile.fa"
+            );
+        }
     }
 }
+
 
 print STDOUT "Process completed successfully!\n";
 
@@ -128,17 +129,18 @@ sub create_summary {
         my $flag       = 0;
 
         if ( $_
-            =~ /No individual domains that satisfy reporting thresholds (although complete target did)/
+            =~ /No individual domains that satisfy reporting thresholds/
             )
         {
             push( @align_info, "no align info" );
+            $counter++;
             next;
         }
         while ( $_
             =~ /\s\s\s\d\s!.*\s+(\d+)\s+(\d+)\s[\.\[\]]{2}\s+(\d+)\s+(\d+)\s[\.\[\]]{2}\s+(\d+)\s+\d+\s[\.\[\]]{2}/g
             )
         {
-            $align_info .= "$1	$2		$3	$4;";
+            $align_info .= "$1  $2      $3  $4;";
             $flag = 1;
         }
         if ( $flag == 1 ) {
@@ -152,17 +154,17 @@ sub create_summary {
 
     if ( (@general_info) && (@align_info) ) {
         for ( my $i = 0; $i <= $#general_info; $i++ ) {
-            if ( $align_info[$i] ne "no align info" ) {
                 print $summary_fh "$general_info[$i] --- $align_info[$i]\n";
-            }
         }
     }
 
     print $summary_fh "\n$counter hit(s).\n\n";
-    print $summary_fh
-        "********************************************************************************\n";
-    print $summary_fh
-        "********************************************************************************\n";
+
+    my $stars = "*" x 80;
+    print $summary_fh $stars . "\n";
+    print $summary_fh $stars . "\n";
+
+
 
 }
 
@@ -237,6 +239,35 @@ sub validate_fasta {
         exit;
     }
 
+}
+
+sub get_report {
+    my ($summary_file) = shift;
+    my %report_counters;
+    my $family;
+
+    open my $summary_fh, '<', $summary_file;
+
+    while (<$summary_fh>) {
+        if(/List of predicted (G\S+) proteins/){
+            $family = $1;
+        }
+
+        if (/^(\d+) hit\(s\)/){
+            $report_counters{$family} = $1;
+        }
+
+        if(/NONE/){
+            $report_counters{$family} = 0;
+        }
+    }
+
+    if (scalar keys %report_counters != 7){
+        print STDERR "Error in generating report\n";
+        die;
+    }
+
+    return \%report_counters;
 }
 
 sub help {
