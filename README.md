@@ -5,7 +5,7 @@ GprotPRED is a tool for accurate detection and classification of G-proteins.
 It uses profile Hidden Markov Models (pHMMs) for the four known heterotrimeric Galpha protein families, 
 the Gbeta and the Ggamma subunit in order to classify a set of protein sequences 
 into the appropriate G-protein family.
-This is a standalone version of GprotPRED tool for local execution.
+This is a standalone version of [GprotPRED] (http://aias.biol.uoa.gr/GprotPRED/) tool for offline use.
 
 DEPENDENCIES
 
@@ -21,7 +21,7 @@ USAGE
 
 		o | output_directory		The directory where the result output files will be stored. Required
 
-	nofasta | no_fasta_output	Use this option if you don't want fasta output. Optional, default: fasta files of the predicted proteins are produced
+	nofasta | no_fasta_output	Use this option if you don't want fasta output. Optional, default: fasta files of the predicted proteins are generated
 
 		p | selected_profiles		Use selected profiles only, i.e. -p Gs,Gio. Optional, default: All profiles are used (Galpha,Gs,Gio,Gq11,G1213,Gbeta,Ggamma)
 	
