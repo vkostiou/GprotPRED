@@ -71,14 +71,6 @@ print STDOUT "Summary file created...\n";
 
 my $report_counters = get_report("$output_dir/$timestamp/summary.txt");
 
-print STDERR 'Galpha' . "\t" . $report_counters->{Galpha} . "\n";
-print STDERR 'Gs' . "\t" . $report_counters->{Gs} . "\n";
-print STDERR 'Gio' . "\t" . $report_counters->{Gio} . "\n";
-print STDERR 'Gq11' . "\t" . $report_counters->{Gq11} . "\n";
-print STDERR 'G1213' . "\t" . $report_counters->{G12} . "\n";
-print STDERR 'Gbeta' . "\t" . $report_counters->{Gbeta} . "\n";
-print STDERR 'Ggamma' . "\t" . $report_counters->{Ggamma} . "\n";
-
 
 if ($fasta_flag) {
     print STDOUT "Creating fasta output files...\n";
@@ -104,14 +96,14 @@ print STDOUT "Process completed successfully!\n";
 sub create_summary {
     my ( $res_file, $profile ) = @_;
 
-    open my $summary_fh, ">>", dirname($res_file) . "/summary.txt";
+    open my $summary_fh, ">>", dirname($res_file) . "/summary.txt" or die "Can not write to file: $!";
 
     print $summary_fh
         "List of predicted $profile proteins (by Pfam database model):\n\n"
         . "E-value  Score  Sequence  Model Start  Model End  Alignment Start  Alignment End\n"
         . "-------- ------  --------  -----------  ---------  ---------------  -------------\n";
 
-    open my $res_fh, "<", $res_file;
+    open my $res_fh, "<", $res_file or die "Can not open file: $!";
 
     my $counter = 0;
     my @general_info;
@@ -129,7 +121,7 @@ sub create_summary {
     }
     close $res_fh;
 
-    open $res_fh, "<", $res_file;
+    open $res_fh, "<", $res_file or die "Can not open file: $!";
 
     local $/ = "\n>>";
     my @align_info;
@@ -181,8 +173,8 @@ sub create_summary {
 sub create_fasta {
     my ( $profile, $input_file, $summary_file, $output_fasta ) = @_;
 
-    open my $summary_fh, "<", $summary_file;
-    open my $fasta_fh,   ">", $output_fasta;
+    open my $summary_fh, "<", $summary_file or die "Can not open file: $!";
+    open my $fasta_fh,   ">", $output_fasta or die "Can not write to file: $!";
 
     my @fam;
 
@@ -198,7 +190,7 @@ sub create_fasta {
     my $pattern;
     for ( my $i = 0; $i <= $#fam; $i++ ) {
         $pattern = $fam[$i];
-        open my $input_fh, "<", $input_file;
+        open my $input_fh, "<", $input_file or die "Can not open file: $!";
 
         $/ = ">";
         while (<$input_fh>) {
@@ -218,7 +210,7 @@ sub create_fasta {
 sub validate_fasta {
     my $valid_protein_seq_characters = "A-Z";
 
-    open my $checkfile, '<', $input_file;
+    open my $checkfile, '<', $input_file or die "Can not open file: $!";
 
     my $counter = 0;
     my $error   = 0;
@@ -256,7 +248,7 @@ sub get_report {
     my %report_counters;
     my $family;
 
-    open my $summary_fh, '<', $summary_file;
+    open my $summary_fh, '<', $summary_file or die "Can not open file: $!";
 
     while (<$summary_fh>) {
         if(/List of predicted (G\S+) proteins/){
