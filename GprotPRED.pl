@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Getopt::Long;
 use File::Basename;
+use Cwd 'abs_path';
 
 my ( $input_file, $help, $output_dir, $fasta_flag, @selected_profiles );
 
@@ -14,7 +15,7 @@ my ( $input_file, $help, $output_dir, $fasta_flag, @selected_profiles );
     "i=s"    => \$input_file,
     "h"      => \$help,
     "o=s"    => \$output_dir,
-    "fasta!" => \$fasta_flag,         #"fasta:o"=> \$fasta_flag,	#boolean
+    "fasta!" => \$fasta_flag,
     "p:s"    => \@selected_profiles
 );
 
@@ -38,7 +39,7 @@ if ( ( !$input_file ) or ( !$output_dir ) ) {
 
 unless ( -e $input_file ) {
     print "$input_file not found\n";
-    help();
+   help();
 }
 
 validate_fasta();
@@ -57,12 +58,14 @@ print STDOUT "Running hmmsearch...\n";
 
 @selected_profiles = split( /,/, join( ',', @selected_profiles ) );
 
+my $abs_path=dirname(abs_path($0));
+
 foreach my $profile (@selected_profiles) {
 
     system(
-        "hmmsearch --cut_tc profiles/$profile.hmm $input_file >$output_dir/$timestamp/$profile.res"
-    );
-    print STDOUT "Storing hmmsearch output for $profile profile...\n";
+        "hmmsearch --cut_tc $abs_path/profiles/$profile.hmm $input_file >$output_dir/$timestamp/$profile.res"
+    ) == 0 or die "error in hmmsearch $!";
+    print STDOUT "Saving hmmsearch output for $profile profile...\n";
     create_summary( "$output_dir/$timestamp/$profile.res", $profile );
 
 }
@@ -71,6 +74,13 @@ print STDOUT "Summary file created...\n";
 
 my $report_counters = get_report("$output_dir/$timestamp/summary.txt");
 
+print STDERR 'Galpha' . "\t" . $report_counters->{Galpha} . "\n";
+print STDERR 'Gs' . "\t" . $report_counters->{Gs} . "\n";
+print STDERR 'Gio' . "\t" . $report_counters->{Gio} . "\n";
+print STDERR 'Gq11' . "\t" . $report_counters->{Gq11} . "\n";
+print STDERR 'G1213' . "\t" . $report_counters->{G12} . "\n";
+print STDERR 'Gbeta' . "\t" . $report_counters->{Gbeta} . "\n";
+print STDERR 'Ggamma' . "\t" . $report_counters->{Ggamma} . "\n";
 
 if ($fasta_flag) {
     print STDOUT "Creating fasta output files...\n";
@@ -105,7 +115,6 @@ sub create_summary {
 
     open my $res_fh, "<", $res_file or die "Can not open file: $!";
 
-    my $counter = 0;
     my @general_info;
 
     while (<$res_fh>) {
@@ -135,7 +144,6 @@ sub create_summary {
             )
         {
             push( @align_info, "no align info" );
-            $counter++;
             next;
         }
         while ( $_
@@ -148,7 +156,6 @@ sub create_summary {
         if ( $flag == 1 ) {
             $align_info .= " $profile";
             push( @align_info, $align_info );
-            $counter++;
         }
     }
 
@@ -156,7 +163,17 @@ sub create_summary {
 
     if ( (@general_info) && (@align_info) ) {
         for ( my $i = 0; $i <= $#general_info; $i++ ) {
-                print $summary_fh "$general_info[$i] --- $align_info[$i]\n";
+                print $summary_fh "$general_info[$i] --- $align_info[$i]\n" unless $align_info[$i] eq "no align info";
+        }
+    }
+
+    my $counter=0;
+
+    foreach my $element (@align_info)
+    {
+        if ($element ne 'no align info')
+        {
+            $counter++;
         }
     }
 
