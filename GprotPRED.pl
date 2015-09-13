@@ -70,6 +70,16 @@ foreach my $profile (@selected_profiles) {
 print STDOUT "Summary file created...\n";
 
 my $report_counters = get_report("$output_dir/$timestamp/summary.txt");
+
+print STDERR 'Galpha' . "\t" . $report_counters->{Galpha} . "\n";
+print STDERR 'Gs' . "\t" . $report_counters->{Gs} . "\n";
+print STDERR 'Gio' . "\t" . $report_counters->{Gio} . "\n";
+print STDERR 'Gq11' . "\t" . $report_counters->{Gq11} . "\n";
+print STDERR 'G1213' . "\t" . $report_counters->{G12} . "\n";
+print STDERR 'Gbeta' . "\t" . $report_counters->{Gbeta} . "\n";
+print STDERR 'Ggamma' . "\t" . $report_counters->{Ggamma} . "\n";
+
+
 if ($fasta_flag) {
     print STDOUT "Creating fasta output files...\n";
     system("mkdir -p $output_dir/$timestamp/fasta_output");
