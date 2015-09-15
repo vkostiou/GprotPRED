@@ -72,15 +72,11 @@ foreach my $profile (@selected_profiles) {
 
 print STDOUT "Summary file created...\n";
 
-my $report_counters = get_report("$output_dir/$timestamp/summary.txt");
+my $report_counters = get_report("$output_dir/$timestamp/summary.txt", \@selected_profiles);
 
-print STDERR 'Galpha' . "\t" . $report_counters->{Galpha} . "\n";
-print STDERR 'Gs' . "\t" . $report_counters->{Gs} . "\n";
-print STDERR 'Gio' . "\t" . $report_counters->{Gio} . "\n";
-print STDERR 'Gq11' . "\t" . $report_counters->{Gq11} . "\n";
-print STDERR 'G1213' . "\t" . $report_counters->{G12} . "\n";
-print STDERR 'Gbeta' . "\t" . $report_counters->{Gbeta} . "\n";
-print STDERR 'Ggamma' . "\t" . $report_counters->{Ggamma} . "\n";
+foreach my $profile (@selected_profiles) {
+    print STDOUT $profile . "\t" . $report_counters->{$profile} . "\n";
+}
 
 if ($fasta_flag) {
     print STDOUT "Creating fasta output files...\n";
@@ -108,10 +104,19 @@ sub create_summary {
 
     open my $summary_fh, ">>", dirname($res_file) . "/summary.txt" or die "Can not write to file: $!";
 
+    if ($profile eq 'Galpha'){
     print $summary_fh
         "List of predicted $profile proteins (by Pfam database model):\n\n"
         . "E-value  Score  Sequence  Model Start  Model End  Alignment Start  Alignment End\n"
-        . "-------- ------  --------  -----------  ---------  ---------------  -------------\n";
+        . "-------- ------  --------  -----------  ---------  ---------------  -------------\n" ;
+     }
+
+     else {
+     print $summary_fh
+        "List of predicted $profile proteins:\n\n"
+        . "E-value  Score  Sequence  Model Start  Model End  Alignment Start  Alignment End\n"
+        . "-------- ------  --------  -----------  ---------  ---------------  -------------\n"
+     } 
 
     open my $res_fh, "<", $res_file or die "Can not open file: $!";
 
@@ -262,6 +267,7 @@ sub validate_fasta {
 
 sub get_report {
     my ($summary_file) = shift;
+    my ($selected_profiles) = shift;
     my %report_counters;
     my $family;
 
@@ -281,7 +287,7 @@ sub get_report {
         }
     }
 
-    if (scalar keys %report_counters != 7){
+    if (scalar keys %report_counters != scalar @{$selected_profiles}){
         print STDERR "Error in generating report\n";
         die;
     }
